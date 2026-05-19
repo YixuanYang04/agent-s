@@ -1,0 +1,27 @@
+numpy
+backoff
+pandas
+openai
+python-dotenv
+anthropic
+fastapi
+uvicorn
+paddleocr
+paddlepaddle
+together
+scikit-learn
+websockets
+tiktoken
+pyautogui
+Pillow
+toml
+black
+pytesseract
+google-genai
+selenium
+paramiko
+
+# Platform-specific dependencies
+pyobjc; platform_system == "Darwin"
+pywinauto; platform_system == "Windows"
+pywin32; platform_system == "Windows" 

@@ -226,7 +226,7 @@ def run_agent(
             continue
 
         else:
-            time.sleep(1.0)
+            time.sleep(0.1)
             print("EXECUTING CODE:", code[0])
 
             # Check for pause state before execution
@@ -235,7 +235,7 @@ def run_agent(
 
             # Ask for permission before executing
             exec(code[0])
-            time.sleep(1.0)
+            time.sleep(0.1)
 
             # Update task and subtask trajectories
             if "reflection" in info and "executor_plan" in info:
@@ -327,9 +327,9 @@ def main():
     )
     parser.add_argument(
         "--enable_reflection",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
         default=True,
-        help="Enable reflection agent to assist the worker agent",
+        help="Enable reflection agent to assist the worker agent. Use --no-enable_reflection to disable.",
     )
     parser.add_argument(
         "--enable_local_env",

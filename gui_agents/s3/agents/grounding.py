@@ -227,6 +227,11 @@ class OSWorldACI(ACI):
 
     # Given the state and worker's referring expression, use the grounding model to generate (x,y)
     def generate_coords(self, ref_expr: str, obs: Dict) -> List[int]:
+        if not hasattr(self, "_coords_cache"):
+            self._coords_cache = {}
+        if ref_expr in self._coords_cache:
+            print(f"USING CACHED GROUNDING COORDS FOR: {ref_expr}")
+            return self._coords_cache[ref_expr]
 
         # Reset the grounding model state
         self.grounding_model.reset()
@@ -242,7 +247,9 @@ class OSWorldACI(ACI):
         print("RAW GROUNDING MODEL RESPONSE:", response)
         numericals = re.findall(r"\d+", response)
         assert len(numericals) >= 2
-        return [int(numericals[0]), int(numericals[1])]
+        coords = [int(numericals[0]), int(numericals[1])]
+        self._coords_cache[ref_expr] = coords
+        return coords
 
     # Calls pytesseract to generate word level bounding boxes for text grounding
     def get_ocr_elements(self, b64_image_data: str) -> Tuple[str, List]:
@@ -285,6 +292,12 @@ class OSWorldACI(ACI):
     def generate_text_coords(
         self, phrase: str, obs: Dict, alignment: str = ""
     ) -> List[int]:
+        if not hasattr(self, "_text_coords_cache"):
+            self._text_coords_cache = {}
+        cache_key = (phrase, alignment)
+        if cache_key in self._text_coords_cache:
+            print(f"USING CACHED TEXT COORDS FOR: {cache_key}")
+            return self._text_coords_cache[cache_key]
 
         ocr_table, ocr_elements = self.get_ocr_elements(obs["screenshot"])
 
@@ -323,10 +336,14 @@ class OSWorldACI(ACI):
                 elem["left"] + (elem["width"] // 2),
                 elem["top"] + (elem["height"] // 2),
             ]
+        
+        self._text_coords_cache[cache_key] = coords
         return coords
 
     def assign_screenshot(self, obs: Dict):
         self.obs = obs
+        self._coords_cache = {}
+        self._text_coords_cache = {}
 
     def set_task_instruction(self, task_instruction: str):
         """Set the current task instruction for the code agent."""

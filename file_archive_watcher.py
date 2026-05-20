@@ -468,7 +468,7 @@ def _feishu_doc_open_search_result_step(step_name: str, doc_title: str) -> str:
     return f"""{step_name}：在搜索结果中点击目标文档以打开它。
 1. 上一步已在 Ctrl+J 搜索框中输入了「{doc_title}」，搜索结果应已出现在搜索面板中。
 2. 在搜索结果列表中，找到标题包含「{doc_title}」的文档条目，用鼠标单击该条目以打开文档。下一条动作应调用 `agent.click("搜索结果中标题为{doc_title}的文档条目", 1, "left")`。
-3. 点击后等待文档加载；如果页面空白、正在加载或尚未出现表格，使用 `agent.wait(3)` 等待。
+3. 点击后等待文档加载；如果页面空白、正在加载或尚未出现表格，使用 `agent.wait(1.5)` 等待。
 4. 若搜索面板中没有出现匹配「{doc_title}」的结果，输出 fail 并说明"搜索结果中未找到目标文档"。"""
 
 
@@ -749,7 +749,7 @@ def _build_agent_s3_cmd(task_file: Path, max_agent_steps: int) -> list:
     gh = os.getenv("AGENT_S_GROUNDING_HEIGHT", "1080").strip() or "1080"
     prov = os.getenv("AGENT_S_PROVIDER", "openai").strip() or "openai"
 
-    return [
+    cmd = [
         sys.executable,
         "-m",
         "gui_agents.s3.cli_app",
@@ -778,6 +778,13 @@ def _build_agent_s3_cmd(task_file: Path, max_agent_steps: int) -> list:
         "--task-file",
         str(task_file.resolve()),
     ]
+
+    # When reflection is disabled, skip per-step reflection LLM calls for faster execution
+    enable_ref = os.getenv("AGENT_S_ENABLE_REFLECTION", "1").strip().lower()
+    if enable_ref in ("0", "false", "no", "off"):
+        cmd.append("--no-enable_reflection")
+
+    return cmd
 
 
 def run_feishu_agent_if_enabled(

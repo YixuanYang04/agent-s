@@ -100,6 +100,10 @@ def main() -> int:
     if first_env("AGENT_S_ENABLE_LOCAL_ENV", default="0").lower() in {"1", "true", "yes", "on"}:
         cmd.append("--enable_local_env")
 
+    enable_reflection = first_env("AGENT_S_ENABLE_REFLECTION", default="1")
+    if enable_reflection.lower() in {"0", "false", "no", "off"}:
+        cmd.append("--no-enable_reflection")
+
     cmd.extend(sys.argv[1:])
 
     try:
